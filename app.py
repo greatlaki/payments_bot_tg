@@ -3,8 +3,30 @@ import requests
 from dotenv import load_dotenv
 import os
 from os.path import join, dirname
+from yookassa import Configuration, Payment
 
 app = Flask(__name__)
+
+
+def create_invoice(chat_id):
+
+    Configuration.account_id = get_from_env("SHOP_ID")
+    Configuration.secret_key = get_from_env("PAYMENT_TOKEN")
+
+    payment = Payment.create({
+        "amount": {
+            "value": "100.00",
+            "currency": "RUB"
+        },
+        "confirmation": {
+            "type": "redirect",
+            "return_url": "https://www.google.com"  # payment has been successfully completed
+        },
+        "capture": True,
+        "description": "Заказ №1",
+        "metadata": {"chat_id": chat_id,
+                     }
+    })
 
 
 def get_from_env(key):
