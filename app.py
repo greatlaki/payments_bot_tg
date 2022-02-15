@@ -28,6 +28,8 @@ def create_invoice(chat_id):
                      }
     })
 
+    return payment.confirmation.confirmation_url
+
 
 def get_from_env(key):
     dotenv_path = join(dirname(__file__), '.env')
@@ -46,7 +48,7 @@ def send_message(chat_id, text):
 @app.route('/', methods=["POST"])  # localhost:5000/ - на этот адрес телеграм шлет свои сообщения
 def process():
     chat_id = request.json["message"]["chat"]["id"]
-    send_message(chat_id=chat_id, text="Привет")
+    send_message(chat_id=chat_id, text=create_invoice(chat_id))
     return {"ok": True}
 
 
