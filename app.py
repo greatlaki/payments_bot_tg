@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from os.path import join, dirname
 from yookassa import Configuration, Payment
+import json
 
 app = Flask(__name__)
 
@@ -45,10 +46,25 @@ def send_message(chat_id, text):
     requests.post(url, data=data)
 
 
+def send_pay_button(chat_id, text):
+    invoice_url = create_invoice(chat_id)
+
+    method = "sendMessage"
+    token = get_from_env("TELEGRAM_BOT_TOKEN")
+    url = f"https://api.telegram.org/bot{token}/{method}"
+
+    data = {"chat_id": chat_id, "text": text, "reply_markup": json.dumps({"inline_keyboard": [[{
+        "text": "Оплатить!",
+        "url": f"{invoice_url}"
+    }]]})}
+
+    requests.post(url, data=data)
+
+
 @app.route('/', methods=["POST"])  # localhost:5000/ - на этот адрес телеграм шлет свои сообщения
 def process():
     chat_id = request.json["message"]["chat"]["id"]
-    send_message(chat_id=chat_id, text=create_invoice(chat_id))
+    send_pay_button(chat_id=chat_id, text="Тестовая оплата")
     return {"ok": True}
 
 
