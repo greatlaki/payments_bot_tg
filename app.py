@@ -61,10 +61,27 @@ def send_pay_button(chat_id, text):
     requests.post(url, data=data)
 
 
+def check_if_successful_payment(request):
+    try:
+        if request.json["event"] == "payment.succeeded":
+            return True
+    except KeyError:
+        return False
+
+    return False
+
+
 @app.route('/', methods=["POST"])  # localhost:5000/ - на этот адрес телеграм шлет свои сообщения
 def process():
-    chat_id = request.json["message"]["chat"]["id"]
-    send_pay_button(chat_id=chat_id, text="Тестовая оплата")
+    if check_if_successful_payment(request):
+        # Обработка запроса от Юкассы
+        chat_id = request.json["object"]["metadata"]["chat_id"]
+        send_message(chat_id, "Оплата прошла успешно")
+    else:
+        # Обработка запроса от Телеграм
+        chat_id = request.json["message"]["chat"]["id"]
+        send_pay_button(chat_id=chat_id, text="Тестовая оплата")
+
     return {"ok": True}
 
 
